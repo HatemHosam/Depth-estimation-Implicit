@@ -53,7 +53,7 @@ for file in h5_list_test:
         img = np.transpose(f['rgb'], (1, 2, 0))
         img = np.array(img, dtype = np.uint8)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        cv2.imwrite('/data/i5O/nyudepthv2_data/val/image/+file.split('/')[-1].replace('.h5','.jpg'), img)
+        cv2.imwrite('/data/i5O/nyudepthv2_data/val/image/'+file.split('/')[-1].replace('.h5','.jpg'), img)
 
 		
 
