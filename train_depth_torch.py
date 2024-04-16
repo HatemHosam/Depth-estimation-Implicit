@@ -31,18 +31,18 @@ class DepthMapDataset(Dataset):
         depth_image = np.load(depth_path).astype(np.float32)
         #depth_image = Image.fromarray(depth_image, mode = 'L')
         #depth_image = transform_depth(depth_image)
-        depth_image = cv2.resize(depth_image, dsize=(15,20))
+        depth_image = cv2.resize(depth_image, dsize=(30,40))
         depth_image = torch.from_numpy(depth_image)
 
         return rgb_image, depth_image
 
 transform_img = transforms.Compose([
-    transforms.Resize((240, 320)),
+    transforms.Resize((480, 640)),
     transforms.ToTensor(),
 ])
 
 transform_depth = transforms.Compose([
-    transforms.Resize((15, 20)),
+    #transforms.Resize((15, 20)),
     transforms.ToTensor(),
 ])
 
@@ -85,7 +85,7 @@ def calculate_rae(outputs, labels, mean_labels):
     mean_absolute_errors = torch.abs(labels - mean_labels)
     return torch.sum(absolute_errors) / torch.sum(mean_absolute_errors)
 
-mean_labels = 2.6 # torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
+mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
 # Training loop
 num_epochs = 50
 for epoch in range(num_epochs):
