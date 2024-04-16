@@ -31,6 +31,30 @@ for file in h5_list:
     if i > 20000:
         break
 
+img_dir_test = 'data/i5O/nyudepthv2/test/'
+img_folders_test = os.listdir(img_dir_test)
+h5_list_test = []
+
+for folder in img_folders:
+    for h5_file in os.listdir(img_dir_test+folder):
+        h5_list_test.append(img_dir_test+folder+'/'+h5_file)
+        
+print(h5_list_test)		
+shuffle(h5_list_test)
+
+j = 0
+for file in h5_list_test:
+    j += 1
+    with h5py.File(file, "r") as f:
+        depth = f['depth']
+        depth = (depth[:]).astype('float')
+        np.save('/data/i5O/nyudepthv2/test/depth/'+file.split('/')[-1].replace('.h5','.npy'), depth)
+		
+        img = np.transpose(f['rgb'], (1, 2, 0))
+        img = np.array(img, dtype = np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        cv2.imwrite('/data/i5O/nyudepthv2/test/image/'+'_'+file.split('/')[-1].replace('.h5','.jpg'), img)
+
 		
 
 		
