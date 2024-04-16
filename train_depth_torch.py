@@ -47,10 +47,10 @@ transform_depth = transforms.Compose([
 ])
 
 train_dataset = DepthMapDataset('/data/nyudepthv2_data/train/image/', '/data/nyudepthv2_data/train/depth/', transform_img, transform_depth)
-train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=24)
 
 val_dataset = DepthMapDataset('/data/nyudepthv2_data/val/image/', '/data/nyudepthv2_data/val/depth/', transform_img, transform_depth)
-val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, pin_memory=True)
+val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=24)
 # Load ConvNext-tiny pre-trained model
 base_model = convnext_tiny(pretrained=True)
 
