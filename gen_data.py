@@ -4,7 +4,7 @@ import os
 from random import shuffle
 import numpy as np
 
-img_dir = 'data/i5O/nyudepthv2/train/'
+img_dir = '/data/i5O/nyudepthv2/train/'
 img_folders = os.listdir(img_dir)
 h5_list = []
 
@@ -31,7 +31,7 @@ for file in h5_list:
     if i > 20000:
         break
 
-img_dir_test = 'data/i5O/nyudepthv2/val/official/'
+img_dir_test = '/data/i5O/nyudepthv2/val/official/'
 img_folders_test = os.listdir(img_dir_test)
 h5_list_test = []
 
