@@ -84,7 +84,7 @@ if __name__ == '__main__':
    
     def calculate_rmse(outputs, labels):
         n_pxls = sum( labels>0 )
-        rms_log = torch.sqrt(torch.mean( torch.pow( torch.log(labels) - torch.log(outputs), 2)))
+        rmse_log = torch.sqrt(torch.mean( torch.pow( torch.log(labels) - torch.log(outputs), 2)))
         return rmse_log
     
     #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
