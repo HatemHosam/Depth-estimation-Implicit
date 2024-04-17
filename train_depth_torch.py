@@ -62,10 +62,10 @@ class CustomConvNextTiny(nn.Module):
         return x
 if __name__ == '__main__':       
     train_dataset = DepthMapDataset('/data/i5O/nyudepthv2_data/train/image/', '/data/i5O/nyudepthv2_data/train/depth/', transform_img, transform_depth)
-    train_loader = DataLoader(train_dataset, batch_size=96, shuffle=True, num_workers=0, pin_memory= True)
+    train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True, num_workers=0, pin_memory= True)
     
     val_dataset = DepthMapDataset('/data/i5O/nyudepthv2_data/val/image/', '/data/i5O/nyudepthv2_data/val/depth/', transform_img, transform_depth)
-    val_loader = DataLoader(val_dataset, batch_size=96, shuffle=False, num_workers=0,  pin_memory= True)
+    val_loader = DataLoader(val_dataset, batch_size=100, shuffle=False, num_workers=0,  pin_memory= True)
     # Load ConvNext-tiny pre-trained model
     base_model = convnext_tiny(pretrained=True)
     
@@ -86,8 +86,13 @@ if __name__ == '__main__':
         absolute_errors = torch.abs(outputs - labels)
         mean_absolute_errors = torch.abs(labels - mean_labels)
         return torch.sum(absolute_errors) / torch.sum(mean_absolute_errors)
+   
+    def calculate_rmse(outputs, labels, mean_labels):
+        n_pxls = sum( labels>0 )
+        rms_log = mean( ( log(labels) - log(outputs) ).^2 ) ^ 0.5
+        return rmse_log
     
-    mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
+    #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
     # Training loop
     num_epochs = 50
     for epoch in range(num_epochs):
@@ -114,18 +119,18 @@ if __name__ == '__main__':
         
         # Validation loop
         model.eval()
-        total_rae = 0.0
+        total_rmse = 0.0
         total_samples = 0
         with torch.no_grad():
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-                total_rae += calculate_rae(outputs, labels, mean_labels)
+                total_rmse += calculate_rmse(outputs, labels, mean_labels)
                 total_samples += labels.size(0)
             
-            average_rae = total_rae / total_samples
+            average_rae = total_rmse / total_samples
             print(f"Validation RAE: {average_rae:.8f}")
         
         # Save the model after each epoch or iteration with the loss value in the filename
-        filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rae:.8f}.pth"
+        filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rmse:.8f}.pth"
         torch.save(model.state_dict(), filename)
