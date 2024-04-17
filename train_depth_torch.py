@@ -46,14 +46,6 @@ transform_depth = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-train_dataset = DepthMapDataset('/data/nyudepthv2_data/train/image/', '/data/nyudepthv2_data/train/depth/', transform_img, transform_depth)
-train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=24)
-
-val_dataset = DepthMapDataset('/data/nyudepthv2_data/val/image/', '/data/nyudepthv2_data/val/depth/', transform_img, transform_depth)
-val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=24)
-# Load ConvNext-tiny pre-trained model
-base_model = convnext_tiny(pretrained=True)
-
 class CustomConvNextTiny(nn.Module):
     def __init__(self, original_model):
         super(CustomConvNextTiny, self).__init__()
@@ -68,62 +60,72 @@ class CustomConvNextTiny(nn.Module):
         x = self.initial_layers(x)
         x = self.extra_conv(x)
         return x
-
-# Initialize the custom model
-model = CustomConvNextTiny(base_model)
-print(model)
-# Move the model to GPU if available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.to(device)
-
-# Loss function and optimizer
-criterion = nn.HuberLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-def calculate_rae(outputs, labels, mean_labels):
-    absolute_errors = torch.abs(outputs - labels)
-    mean_absolute_errors = torch.abs(labels - mean_labels)
-    return torch.sum(absolute_errors) / torch.sum(mean_absolute_errors)
-
-mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
-# Training loop
-num_epochs = 50
-for epoch in range(num_epochs):
-    train_bar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}')
-    for rgb_images, depth_images in train_loader:
-        rgb_images = rgb_images.to(device)
-        depth_images = depth_images.to(device).view(depth_images.size(0), -1)  # Flatten depth maps
-
-        # Forward pass
-        outputs = model(rgb_images)
-        outputs_flat = outputs.view(outputs.size(0), -1)  # Reshapes to [256, 196]
-        loss = criterion(outputs_flat, depth_images)
-
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        # Update the progress bar with the loss value
-        train_bar.update(1)
-        train_bar.set_postfix({'loss': loss.item()})
-    # Save the model after each epoch or iteration with the loss value in the filename
-    #loss_value = loss.item()
-    #print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.8f}')
+if __name__ == '__main__':       
+    train_dataset = DepthMapDataset('/data/nyudepthv2_data/train/image/', '/data/nyudepthv2_data/train/depth/', transform_img, transform_depth)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=24)
     
-    # Validation loop
-    model.eval()
-    total_rae = 0.0
-    total_samples = 0
-    with torch.no_grad():
-        for images, labels in val_loader:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            total_rae += calculate_rae(outputs, labels, mean_labels)
-            total_samples += labels.size(0)
+    val_dataset = DepthMapDataset('/data/nyudepthv2_data/val/image/', '/data/nyudepthv2_data/val/depth/', transform_img, transform_depth)
+    val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=24)
+    # Load ConvNext-tiny pre-trained model
+    base_model = convnext_tiny(pretrained=True)
+    
+    
+    
+    # Initialize the custom model
+    model = CustomConvNextTiny(base_model)
+    print(model)
+    # Move the model to GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    
+    # Loss function and optimizer
+    criterion = nn.HuberLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    
+    def calculate_rae(outputs, labels, mean_labels):
+        absolute_errors = torch.abs(outputs - labels)
+        mean_absolute_errors = torch.abs(labels - mean_labels)
+        return torch.sum(absolute_errors) / torch.sum(mean_absolute_errors)
+    
+    mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
+    # Training loop
+    num_epochs = 50
+    for epoch in range(num_epochs):
+        train_bar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}')
+        for rgb_images, depth_images in train_loader:
+            rgb_images = rgb_images.to(device)
+            depth_images = depth_images.to(device).view(depth_images.size(0), -1)  # Flatten depth maps
+    
+            # Forward pass
+            outputs = model(rgb_images)
+            outputs_flat = outputs.view(outputs.size(0), -1)  # Reshapes to [256, 196]
+            loss = criterion(outputs_flat, depth_images)
+    
+            # Backward and optimize
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            # Update the progress bar with the loss value
+            train_bar.update(1)
+            train_bar.set_postfix({'loss': loss.item()})
+        # Save the model after each epoch or iteration with the loss value in the filename
+        #loss_value = loss.item()
+        #print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.8f}')
         
-        average_rae = total_rae / total_samples
-        print(f"Validation RAE: {average_rae:.8f}")
-    
-    # Save the model after each epoch or iteration with the loss value in the filename
-    filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rae:.8f}.pth"
-    torch.save(model.state_dict(), filename)
+        # Validation loop
+        model.eval()
+        total_rae = 0.0
+        total_samples = 0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                total_rae += calculate_rae(outputs, labels, mean_labels)
+                total_samples += labels.size(0)
+            
+            average_rae = total_rae / total_samples
+            print(f"Validation RAE: {average_rae:.8f}")
+        
+        # Save the model after each epoch or iteration with the loss value in the filename
+        filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rae:.8f}.pth"
+        torch.save(model.state_dict(), filename)
