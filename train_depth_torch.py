@@ -118,14 +118,15 @@ if __name__ == '__main__':
         total_samples = 0
         with torch.no_grad():
             for images, labels in val_loader:
-                images, labels = images.to(device), labels.to(device)
+                images, labels = images.to(device), labels.to(device).view(labels.size(0), -1)
                 outputs = model(images)
-                total_rmse += calculate_rmse(outputs, labels,)
+                outputs_flat = outputs.view(outputs.size(0), -1)
+                total_rmse += calculate_rmse(outputs_flat, labels)
                 total_samples += labels.size(0)
             
             average_rae = total_rmse / total_samples
             print(f"Validation RMSE: {average_rmse:.8f}")
         
         # Save the model after each epoch or iteration with the loss value in the filename
-        filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rmse:.8f}.pth"
+        filename = f"weights_30_40/epoch_{epoch+1}_val_RMSE_{average_rmse:.8f}.pth"
         torch.save(model.state_dict(), filename)
