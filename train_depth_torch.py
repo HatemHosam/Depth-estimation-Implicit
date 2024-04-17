@@ -127,6 +127,6 @@ if __name__ == '__main__':
             average_rae = total_rmse / total_samples
             print(f"Validation RMSE: {average_rmse:.8f}")
         
-        # Save the model after each epoch or iteration with the loss value in the filename
-        filename = f"weights_30_40/epoch_{epoch+1}_val_RMSE_{average_rmse:.8f}.pth"
-        torch.save(model.state_dict(), filename)
+            # Save the model after each epoch or iteration with the loss value in the filename
+            filename = f"weights_30_40/epoch_{epoch+1}_val_RMSE_{average_rmse:.8f}.pth"
+            torch.save(model.state_dict(), filename)
