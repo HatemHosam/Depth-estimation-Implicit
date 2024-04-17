@@ -81,15 +81,10 @@ if __name__ == '__main__':
     # Loss function and optimizer
     criterion = nn.HuberLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    
-    def calculate_rae(outputs, labels, mean_labels):
-        absolute_errors = torch.abs(outputs - labels)
-        mean_absolute_errors = torch.abs(labels - mean_labels)
-        return torch.sum(absolute_errors) / torch.sum(mean_absolute_errors)
    
-    def calculate_rmse(outputs, labels, mean_labels):
+    def calculate_rmse(outputs, labels):
         n_pxls = sum( labels>0 )
-        rms_log = mean( ( log(labels) - log(outputs) )^2 ) ^ 0.5
+        rms_log = torch.sqrt(torch.mean( torch.pow( torch.log(labels) - torch.log(outputs), 2)))
         return rmse_log
     
     #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
