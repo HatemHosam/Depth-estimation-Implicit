@@ -89,7 +89,7 @@ if __name__ == '__main__':
     
     #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
     # Training loop
-    num_epochs = 50
+    num_epochs = 100
     for epoch in range(num_epochs):
         train_bar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}')
         for rgb_images, depth_images in train_loader:
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 total_rmse += calculate_rmse(outputs_flat, labels)
                 total_samples += labels.size(0)
             
-            average_rae = total_rmse / total_samples
+            average_rmse = total_rmse / total_samples
             print(f"Validation RMSE: {average_rmse:.8f}")
         
             # Save the model after each epoch or iteration with the loss value in the filename
