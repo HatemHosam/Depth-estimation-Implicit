@@ -37,7 +37,7 @@ h5_list_test = []
 
 for folder in img_folders_test:
     #for h5_file in os.listdir(img_dir_test+folder):
-    h5_list_test.append(img_folders_test+folder+'/'+h5_file)
+    h5_list_test.append(img_dir_test+folder+'/'+h5_file)
         
 #print(h5_list_test)		
 shuffle(h5_list_test)
