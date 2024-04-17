@@ -97,7 +97,7 @@ if __name__ == '__main__':
     num_epochs = 50
     for epoch in range(num_epochs):
         train_bar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}')
-        for rgb_images, depth_images in train_loader:
+        for rgb_images, depth_images in train_loader[:10]:
             rgb_images = rgb_images.to(device)
             depth_images = depth_images.to(device).view(depth_images.size(0), -1)  # Flatten depth maps
     
