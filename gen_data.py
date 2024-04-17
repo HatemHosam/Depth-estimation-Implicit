@@ -35,7 +35,7 @@ img_dir_test = '/data/i5O/nyudepthv2/val/official/'
 img_folders_test = os.listdir(img_dir_test)
 h5_list_test = []
 
-for folder in img_folders:
+for folder in img_folders_test:
     for h5_file in os.listdir(img_dir_test+folder):
         h5_list_test.append(img_dir_test+folder+'/'+h5_file)
         
