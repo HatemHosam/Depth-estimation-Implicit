@@ -125,11 +125,11 @@ if __name__ == '__main__':
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-                total_rmse += calculate_rmse(outputs, labels, mean_labels)
+                total_rmse += calculate_rmse(outputs, labels,)
                 total_samples += labels.size(0)
             
             average_rae = total_rmse / total_samples
-            print(f"Validation RAE: {average_rae:.8f}")
+            print(f"Validation RMSE: {average_rmse:.8f}")
         
         # Save the model after each epoch or iteration with the loss value in the filename
         filename = f"weights_30_40/epoch_{epoch+1}_val_RAE_{average_rmse:.8f}.pth"
