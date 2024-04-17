@@ -62,10 +62,10 @@ class CustomConvNextTiny(nn.Module):
         return x
 if __name__ == '__main__':       
     train_dataset = DepthMapDataset('/data/i5O/nyudepthv2_data/train/image/', '/data/i5O/nyudepthv2_data/train/depth/', transform_img, transform_depth)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=32)
+    train_loader = DataLoader(train_dataset, batch_size=96, shuffle=True, num_workers=32)
     
     val_dataset = DepthMapDataset('/data/i5O/nyudepthv2_data/val/image/', '/data/i5O/nyudepthv2_data/val/depth/', transform_img, transform_depth)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=32)
+    val_loader = DataLoader(val_dataset, batch_size=96, shuffle=False, num_workers=32)
     # Load ConvNext-tiny pre-trained model
     base_model = convnext_tiny(pretrained=True)
     
