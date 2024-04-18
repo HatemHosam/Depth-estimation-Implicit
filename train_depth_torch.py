@@ -86,6 +86,7 @@ if __name__ == '__main__':
         mask = labels > 0  # Create a boolean mask for values greater than zero
         if torch.sum(mask) == 0:
             return torch.tensor(float('nan'))  # Return NaN if no element is greater than zero
+        labels = torch.add(labels, 0.00000001)
         rmse_log = torch.sqrt(torch.mean((torch.log(labels[mask]) - torch.log(outputs[mask])) ** 2))
         return rmse_log
     
