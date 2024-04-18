@@ -110,7 +110,7 @@ if __name__ == '__main__':
             train_bar.update(1)
             train_bar.set_postfix({'loss': loss.item()})
         # Save the model after each epoch or iteration with the loss value in the filename
-        #loss_value = loss.item()
+        loss_value = loss.item()
         #print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.8f}')
         
         # Validation loop
@@ -129,5 +129,5 @@ if __name__ == '__main__':
             print(f"Validation RMSE: {average_rmse:.8f}")
         
             # Save the model after each epoch or iteration with the loss value in the filename
-            filename = f"weights_30_40/epoch_{epoch+1}_val_RMSE_{average_rmse:.8f}.pth"
+            filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_RMSE_{average_rmse:.8f}.pth"
             torch.save(model.state_dict(), filename)
