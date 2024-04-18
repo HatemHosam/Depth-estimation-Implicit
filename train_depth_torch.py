@@ -83,9 +83,10 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001)
    
     def calculate_rmse(outputs, labels):
-        n_pxls = sum( labels>0 )
-        indices = torch.nonzero(labels)
-        rmse_log = torch.sqrt(torch.mean( torch.pow( torch.log(labels[indices]) - torch.log(outputs[indices]), 2)))
+        mask = labels > 0  # Create a boolean mask for values greater than zero
+        if torch.sum(mask) == 0:
+            return torch.tensor(float('nan'))  # Return NaN if no element is greater than zero
+        rmse_log = torch.sqrt(torch.mean((torch.log(labels[mask]) - torch.log(outputs[mask])) ** 2))
         return rmse_log
     
     #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
