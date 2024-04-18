@@ -128,7 +128,7 @@ if __name__ == '__main__':
                 total_samples += labels.size(0)
             
             average_mae = total_mae / total_samples
-            print(f"Validation MAE: {average_mse:.8f}")
+            print(f"Validation MAE: {average_mae:.8f}")
         
             # Save the model after each epoch or iteration with the loss value in the filename
             filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_MAE_{average_mae:.8f}.pth"
