@@ -82,14 +82,14 @@ if __name__ == '__main__':
     criterion = nn.HuberLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
    
-    def calculate_rmse(outputs, labels):
-        mask = labels > 0  # Create a boolean mask for values greater than zero
-        if torch.sum(mask) == 0:
-            return torch.tensor(float('nan'))  # Return NaN if no element is greater than zero
-        labels = torch.add(labels, 0.00000001)
-        rmse_log = torch.sqrt(torch.mean((torch.log(labels[mask]) - torch.log(outputs[mask])) ** 2))
-        return rmse_log
-    
+    #def calculate_rmse(outputs, labels):
+    #    mask = labels > 0  # Create a boolean mask for values greater than zero
+    #    if torch.sum(mask) == 0:
+    #        return torch.tensor(float('nan'))  # Return NaN if no element is greater than zero
+    #    labels = torch.add(labels, 0.00000001)
+    #    rmse_log = torch.sqrt(torch.mean((torch.log(labels[mask]) - torch.log(outputs[mask])) ** 2))
+    #    return rmse_log
+    mae = nn.L1Loss()
     #mean_labels = torch.mean(torch.cat([labels for _, labels in val_loader], 0))   
     # Training loop
     num_epochs = 100
@@ -124,12 +124,12 @@ if __name__ == '__main__':
                 images, labels = images.to(device), labels.to(device).view(labels.size(0), -1)
                 outputs = model(images)
                 outputs_flat = outputs.view(outputs.size(0), -1)
-                total_rmse += calculate_rmse(outputs_flat, labels)
+                total_mae += mae(outputs_flat, labels)
                 total_samples += labels.size(0)
             
-            average_rmse = total_rmse / total_samples
-            print(f"Validation RMSE: {average_rmse:.8f}")
+            average_mae = total_mae / total_samples
+            print(f"Validation MAE: {average_rmse:.8f}")
         
             # Save the model after each epoch or iteration with the loss value in the filename
-            filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_RMSE_{average_rmse:.8f}.pth"
+            filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_MAE_{average_mae:.8f}.pth"
             torch.save(model.state_dict(), filename)
