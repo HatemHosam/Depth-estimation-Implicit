@@ -117,7 +117,7 @@ if __name__ == '__main__':
         
         # Validation loop
         model.eval()
-        total_rmse = 0.0
+        total_mae = 0.0
         total_samples = 0
         with torch.no_grad():
             for images, labels in val_loader:
