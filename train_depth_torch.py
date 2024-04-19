@@ -119,17 +119,24 @@ if __name__ == '__main__':
         model.eval()
         total_mae = 0.0
         total_samples = 0
+        
         with torch.no_grad():
             for images, labels in val_loader:
-                images, labels = images.to(device), labels.to(device).view(labels.size(0), -1)
+                images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-                outputs_flat = outputs.view(outputs.size(0), -1)
-                total_mae += mae(outputs_flat, labels)
-                total_samples += labels.size(0)
-            
-            average_mae = total_mae / total_samples
-            print(f"Validation MAE: {average_mae:.8f}")
+                # If reshaping is necessary, ensure it's done as efficiently as possible
+                # Example: Ensure 'labels' matches 'outputs' in shape if needed by MAE calculation
+                if outputs.shape != labels.shape:
+                    labels = labels.view_as(outputs)  # Efficiently reshape labels to match output dimensions
         
-            # Save the model after each epoch or iteration with the loss value in the filename
-            filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_MAE_{average_mae:.8f}.pth"
-            torch.save(model.state_dict(), filename)
+                # Compute MAE for the current batch and accumulate
+                batch_mae = mae_loss(outputs, labels)
+                total_mae += batch_mae.item()  # .item() to get Python float, reduce GPU memory usage
+                total_samples += labels.size(0)
+        
+        average_mae = total_mae / total_samples
+        print(f"Validation MAE: {average_mae:.8f}")
+        
+        # Save the model after validation (outside the loop)
+        filename = f"weights_30_40/epoch_{epoch+1}_train_loss_{loss_value:.4f}_val_MAE_{average_mae:.8f}.pth"
+        torch.save(model.state_dict(), filename)
